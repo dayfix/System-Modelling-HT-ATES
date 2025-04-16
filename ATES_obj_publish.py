@@ -135,7 +135,7 @@ class ATES_obj:
         self.heat_cap = heat_capacity_fluid #J/(kg K)
         self.depth = depth
         self.capex = costperm3*max_V  #euro --> kw * (euro/kW)
-        self.fix_opex = fixed_opex*max_V #euro/max_kg/yr
+        self.fix_opex = fixed_opex*max_V #euro/yr
         self.var_opex = var_opex #euro/kg, 
         self.lifetime = lifetime
         self.elec_price = elec_price #euro/kWh
@@ -777,7 +777,7 @@ class ATES_obj:
             opex = sum(abs(self.Thiem_equation())*10*2*abs(self.flow_extracted+self.flow_injected)/self.len_timestep/self.pump_efficiency*self.elec_price)*(self.len_timestep/3600)
             #Calculate the power required from the pumps based on the thiem equation (See Daniilidis et al. (2022) for equation)
             #This is times two to represent the cold well as well (approximation).
-            opex = opex+self.fix_opex*max(self.flow_extracted/self.len_timestep*3600)*1000
+            opex = opex+self.fix_opex
         except:
             opex = 0
 
