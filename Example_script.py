@@ -20,10 +20,10 @@ if __name__ == "__main__":
     timestep = 3600 #timestep in seconds
     
     #Create demand and DH components
-    demand = demand_class(T_in =90,T_out = 55,example_demand="Amsterdam")
+    demand = demand_class(T_in =75,T_out = 55,example_demand="Amsterdam")
     gas = gas_boiler()
-    geo = geothermal(power=6000,T_out=90)#,flow_rate = 320)
-    ATES = ATES_obj([geo],max_V = 250,thickness=40,kh=5,ani=4,T_ground=15)
+    geo = geothermal(power=3000,T_out=75)#,flow_rate = 320)
+    ATES = ATES_obj([geo],max_V = 300,thickness=40,kh=5,ani=4,T_ground=15)
     # solar = Solar_collector(peak_power = 120)
     supply = [geo,ATES, gas]
 
@@ -34,12 +34,8 @@ if __name__ == "__main__":
     system_plot(result, supply, demand, len_timestep=timestep, setting ='demand_met')
     system_plot(result, supply, demand, len_timestep=timestep, setting ='ordered')
     total_result = pd.concat([total_result,result])
-    
-    RES_share_list = []
-    boiler_list = []
-
-           
-    df_eco = economic_analysis(result, supply)
+    df_eco = economic_analysis(result, supply,incorporate_CO2=True)
+    LCOE_Yang = LCOE_calc_Yang(result,supply,df_eco,lifetime_system=60)
     sum_cost = 0
     
     df_CO2 = CO2_emissions_calc(result, supply)
@@ -50,4 +46,22 @@ if __name__ == "__main__":
             sum_cost = sum_cost + df_eco.loc[i.name]["LCOE"]*sum(result[str(i.name)+" corrected"])
     for i in range(len(df_eco)):
         print("LCOH of ", df_eco.iloc[i,0]," = ", round(df_eco.iloc[i].loc["LCOE"],3),"euro/kWh")
+    supply = [geo,gas]
+    result,df_flow = system(demand,supply,len_timestep=timestep)
+    df_eco_2 = economic_analysis(result, supply,incorporate_CO2=True)
+    LCOE_Yang = LCOE_calc_Yang(result,supply,df_eco_2,lifetime_system=60)
+
+    df_CO2_2 = CO2_emissions_calc(result, supply)
+
+    
+    df_eco.loc[:,"CO2_per_kWh"]=df_CO2.loc[:,"CO2_emission [kg]"].sum()/ sum(demand.data)
+    df_eco_2.loc[:,"CO2_per_kWh"]=df_CO2_2.loc[:,"CO2_emission [kg]"].sum()/ sum(demand.data)
+
+    CO2_change = df_eco["CO2_per_kWh"].reset_index(drop=True) -df_eco_2["CO2_per_kWh"].reset_index(drop=True)
+    Cost_change = df_eco['LCOE_System'].reset_index(drop=True) -df_eco_2['LCOE_System'].reset_index(drop=True)
+    CRC = -Cost_change/CO2_change
+    print("CRC of HT-ATES = ",CRC.iloc[0]," euro/kgCO2")
+
+           
+
     plt.show()
