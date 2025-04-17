@@ -835,7 +835,7 @@ if __name__ == "__main__":
     plt.figure(dpi=800)
     plt.plot(np.linspace(0,8,417),ATES.temp_out,label="Well temperature")
     plt.xlabel("Time (years)")
-    plt.ylabel("Well temperature ($^\circ$C)")
+    plt.ylabel("Well temperature (Celsius)")
     ylim=plt.ylim()
     plt.ylim(ylim)
     new_tick_locations = ((np.array([.5, 1, 1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8])-0.25))

@@ -304,6 +304,35 @@ class demand_class:
         mass_water = joules_needed/delta_t/self.heat_cap
         volume = mass_water/self.density
         return volume , self.T_out
+class supplier_template:
+    """
+    This is a template for how to make an supply object to be used in this script
+    It should have the following function definitions within the object.
+    """
+    def __init__(self, power = 5, capex =100,opex=5):
+        self.name = 'template' #System name
+        self.control = 'stable'       #Control system type
+        self.type = 'supply'          #Heat supply t ype
+        self.capex = capex
+        self.power = power
+        self.CO2_kg = 200 #kgCO2/MWh or gCO2/kWh
+    def calc_output(self,len_timestep,demand):
+        return self.power/len_timestep #in kWh
+    
+    def calc_opex(self, produced_kWh):
+        #Calculate opex in euros/year
+        return self.opex * produced_kWh 
+    
+    def calc_flow(self,T_in):
+        #Calculate flow object, necessary for STES
+        volume = T_in *5 #Nonsensical equation
+        return volume, self.T_out
+    
+    def calc_emissions(self,result):
+        #Calculate emissions with some error handling
+        generated = sum(result["supplier corrected"])
+        return generated*self.CO2_kg #gram CO2
+
 
 # class heat_pump_ATES:
 #     #Not tested. 
